@@ -2,9 +2,12 @@ import inspect
 from inspect import Signature, Parameter
 from typing import Dict, List, Callable, Any, Optional, Union
 
-import illuminate.container.bound
-from .builder import ContextualBindingBuilder
+from illuminate.support.utils import call_user_func
+
 from illuminate.contract.container import Container as ContainerInterface, ContextualBindingBuilder as ContextualBindingBuilderInterface
+
+from illuminate.container import bound
+from .builder import ContextualBindingBuilder
 from .exception import BindingResolutionException, EntryNotFoundException
 from .types import ClassAnnotation, Abstract, Concrete, Parameters
 
@@ -204,7 +207,7 @@ class Container(ContainerInterface):
         return closure
 
     def call(self, callback: Callable, parameters: Parameters = None, default_method: Callable = None):
-        return illuminate.container.bound.call(self, callback, parameters, default_method)
+        return bound.call(self, callback, parameters, default_method)
 
     def factory(self, abstract: ClassAnnotation) -> Callable:
         def closure():
@@ -440,9 +443,3 @@ class Container(ContainerInterface):
         self.bindings = {}
         self.instances = {}
         self.abstractAliases = {}
-
-
-def call_user_func(func: Callable, *args) -> Any:
-    signature = inspect.signature(func)
-    args = args[0:len(signature.parameters)]
-    return func(*args)
