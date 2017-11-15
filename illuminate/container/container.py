@@ -443,3 +443,19 @@ class Container(ContainerInterface):
         self.bindings = {}
         self.instances = {}
         self.abstractAliases = {}
+
+    def __getitem__(self, key):
+        return self.make(key)
+
+    def __setitem__(self, key, value):
+        def closure():
+            return value
+        self.bind(key, value if callable(value) else closure)
+
+    def __contains__(self, key):
+        return self.bound(key)
+
+    def __delitem__(self, key):
+        self.bindings.pop(key, None)
+        self.instances.pop(key, None)
+        self._resolved.pop(key, None)
