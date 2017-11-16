@@ -11,11 +11,13 @@ Events = Union[List[str], str]
 
 class Dispatcher:
     container: ContainerContract
-    listeners: Dict[str, List[Any]] = {}
-    wildcards: Dict[str, List[Any]] = {}
+    listeners: Dict[str, List[Any]]
+    wildcards: Dict[str, List[Any]]
 
     def __init__(self, container: ContainerContract = None):
         self.container = container if container is not None else Container()
+        self.listeners: Dict[str, List[Any]] = {}
+        self.wildcards: Dict[str, List[Any]] = {}
 
     def listen(self, events: Events, listener: Any) -> None:
         if not isinstance(events, list):
