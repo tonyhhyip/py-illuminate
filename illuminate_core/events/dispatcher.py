@@ -1,9 +1,9 @@
 from typing import Any, Callable, Dict, List, Union, Optional
 
-from illuminate.contract.container import Container as ContainerContract
-from illuminate.container import Container
-from illuminate.container.types import ClassAnnotation
-from illuminate.support.utils import call_user_func
+from illuminate_core.contract.container import Container as ContainerContract
+from illuminate_core.container import Container
+from illuminate_core.container.types import ClassAnnotation
+from illuminate_core.support.utils import call_user_func
 
 
 Events = Union[List[str], str]

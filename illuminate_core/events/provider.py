@@ -1,4 +1,4 @@
-from illuminate.service import ServiceProvider
+from illuminate_core.service import ServiceProvider
 from .dispatcher import Dispatcher
 
 

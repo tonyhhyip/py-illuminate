@@ -1,6 +1,6 @@
 from typing import List
-from illuminate.contract.container import Container
-from illuminate.container.types import ClassAnnotation
+from illuminate_core.contract.container import Container
+from illuminate_core.container.types import ClassAnnotation
 
 
 class ServiceProvider:

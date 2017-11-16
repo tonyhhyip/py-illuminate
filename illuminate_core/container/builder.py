@@ -1,4 +1,4 @@
-from illuminate.contract.container import Container, ContextualBindingBuilder as ContextualBindingBuilderInterface
+from illuminate_core.contract.container import Container, ContextualBindingBuilder as ContextualBindingBuilderInterface
 
 
 class ContextualBindingBuilder(ContextualBindingBuilderInterface):

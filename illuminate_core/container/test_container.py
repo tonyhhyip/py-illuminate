@@ -1,15 +1,34 @@
-from .kernel import Kernel
-from illuminate.service import ServiceProvider
-from illuminate.contract.container import Container
+from .container import Container
 
 
-def test_construct():
-    kernel = Kernel()
-    assert isinstance(kernel, Kernel)
+def test_create():
+    c = Container()
+    assert isinstance(c, Container)
+
+
+def test_named_instance():
+    c = Container()
+    c.instance('a', 123)
+    a = c.make('a')
+    assert a == 123
+
+
+def test_name_bind_with_setter():
+    c = Container()
+
+    n = [123]
+
+    def closure():
+        n[0] += 1
+        return n[0]
+
+    c['a'] = closure
+    assert c.make('a') == 124
+    assert n[0] == 124
 
 
 def test_name_bind():
-    c = Kernel()
+    c = Container()
 
     t = [123]
 
@@ -23,11 +42,11 @@ def test_name_bind():
 
 
 def test_name_singleton():
-    c = Kernel()
+    c = Container()
 
     n = [123]
 
-    def closure():
+    def closure(container):
         n[0] += 1
         return n[0]
 
@@ -37,11 +56,11 @@ def test_name_singleton():
 
 
 def test_multiple_bind():
-    c = Kernel()
+    c = Container()
 
     c.instance('a', 123)
 
-    def closure(app: Kernel):
+    def closure(app: Container):
         a = app.make('a')
         return a + 1
 
@@ -50,7 +69,7 @@ def test_multiple_bind():
 
 
 def test_name_alias():
-    c = Kernel()
+    c = Container()
 
     def closure():
         return 124
@@ -60,8 +79,19 @@ def test_name_alias():
     assert c.make('b') == 124
 
 
+def test_class_binding():
+    c = Container()
+
+    class A:
+        def __init__(self):
+            pass
+
+    assert isinstance(c.make(A), A)
+    assert isinstance(c[A], A)
+
+
 def test_class_inject():
-    c = Kernel()
+    c = Container()
 
     class A:
         def __init__(self):
@@ -73,16 +103,3 @@ def test_class_inject():
 
     assert isinstance(c.make(B), B)
     assert isinstance(c[B], B)
-
-
-def test_service_provider():
-    c = Kernel()
-
-    class AServiceProvider(ServiceProvider):
-        def register(self):
-            def closure():
-                return 123
-            self.app.singleton('a', closure)
-
-    c.register(AServiceProvider)
-    assert 123 == c.make('a')

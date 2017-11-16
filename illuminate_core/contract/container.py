@@ -1,5 +1,5 @@
 from typing import Any, Callable, List, Optional, Union
-from illuminate.container.types import Abstract, ClassAnnotation, Concrete, Parameters
+from illuminate_core.container.types import Abstract, ClassAnnotation, Concrete, Parameters
 
 
 class ContextualBindingBuilder:

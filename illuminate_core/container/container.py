@@ -2,9 +2,9 @@ import inspect
 from inspect import Signature, Parameter
 from typing import Dict, List, Callable, Any, Optional, Union
 
-from illuminate.support.utils import call_user_func
-from illuminate.contract.container import Container as ContainerInterface, ContextualBindingBuilder as ContextualBindingBuilderInterface
-from illuminate.container import bound
+from illuminate_core.support.utils import call_user_func
+from illuminate_core.contract.container import Container as ContainerInterface, ContextualBindingBuilder as ContextualBindingBuilderInterface
+from illuminate_core.container import bound
 from .builder import ContextualBindingBuilder
 from .exception import BindingResolutionException, EntryNotFoundException
 from .types import ClassAnnotation, Abstract, Concrete, Parameters

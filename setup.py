@@ -19,13 +19,13 @@ setup(
         'Topic :: Dependency Injection'
     ],
     packages=[
-        'illuminate-core',
-        'illuminate-core.container',
-        'illuminate-core.contract',
-        'illuminate-core.events',
-        'illuminate-core.kernel',
-        'illuminate-core.service',
-        'illuminate-core.support',
+        'illuminate_core',
+        'illuminate_core.container',
+        'illuminate_core.contract',
+        'illuminate_core.events',
+        'illuminate_core.kernel',
+        'illuminate_core.service',
+        'illuminate_core.support',
     ],
     install_requires=[],
     include_package_data=True

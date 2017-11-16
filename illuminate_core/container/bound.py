@@ -1,7 +1,7 @@
 import inspect
 from inspect import Signature, Parameter
 from typing import Any, Callable, Dict, List, Union, Optional
-from illuminate.contract.container import Container
+from illuminate_core.contract.container import Container
 from .types import Callback, Parameters
 
 
