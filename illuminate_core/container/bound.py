@@ -11,6 +11,9 @@ def call(
         parameters: Optional[Parameters] = None,
         default_method: Optional[Callable] = None
 ) -> Any:
+    """
+    Call the given Closure / class@method and inject its dependencies.
+    """
     if _is_callable_with_at_sign(callback) or default_method:
         return _call_class(container, callback, parameters, default_method)
 

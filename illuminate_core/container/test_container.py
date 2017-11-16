@@ -99,7 +99,9 @@ def test_class_inject():
 
     class B:
         def __init__(self, a: A):
-            pass
+            self.a = a
 
+    b = c.make(B)
     assert isinstance(c.make(B), B)
     assert isinstance(c[B], B)
+    assert isinstance(c.make(B).a, A)
