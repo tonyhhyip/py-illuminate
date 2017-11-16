@@ -47,21 +47,33 @@ class Container(ContainerInterface):
         self.contextual: Dict[Concrete, Dict[ClassAnnotation, Union[ClassAnnotation, Callable]]] = {}
 
     def when(self, concrete: ClassAnnotation) -> ContextualBindingBuilderInterface:
+        """
+        Define a contextual binding.
+        """
         return ContextualBindingBuilder(self, self.get_alias(concrete))
 
     def bound(self, abstract: ClassAnnotation) -> bool:
+        """
+        Determine if the given abstract type has been bound.
+        """
         return abstract in self.bindings or abstract in self.instances or self.is_alias(abstract)
 
     def has(self, name: ClassAnnotation) -> bool:
         return self.bound(name)
 
     def resolved(self, abstract: ClassAnnotation) -> bool:
+        """
+        Determine if the given abstract type has been resolved.
+        """
         if self.is_alias(abstract):
             abstract = self.get_alias(abstract)
 
         return abstract in self._resolved or abstract in self.instances
 
     def is_shared(self, abstract: ClassAnnotation) -> bool:
+        """
+        Determine if a given type is shared.
+        """
         return abstract in self.instances or \
                (
                 abstract in self.bindings and
@@ -70,9 +82,15 @@ class Container(ContainerInterface):
                 )
 
     def is_alias(self, name: ClassAnnotation) -> bool:
+        """
+        Determine if a given string is an alias.
+        """
         return name in self.aliases
 
     def bind(self, abstract: ClassAnnotation, concrete: Optional[Union[ClassAnnotation, Callable]] = None, shared: bool = False):
+        """
+        Register a binding with the container.
+        """
         self.drop_stale_instances(abstract)
 
         if concrete is None:
@@ -90,6 +108,9 @@ class Container(ContainerInterface):
             self.rebound(abstract)
 
     def get_closure(self, abstract: ClassAnnotation, concrete: ClassAnnotation) -> Callable:
+        """
+        Get the Closure to be used when building a type.
+        """
         def closure(container: Container, parameters: Parameters = None):
             if parameters is None:
                 parameters = []
@@ -102,33 +123,57 @@ class Container(ContainerInterface):
         return closure
 
     def has_method_binding(self, method: str) -> bool:
+        """
+        Determine if the container has a method binding.
+        """
         return method in self.methodBindings
 
     def bind_method(self, method: Union[str, List], callback: Callable) -> None:
+        """
+        Bind a callback to resolve with Container::call.
+        """
         self.methodBindings[self.parse_bind_method(method)] = callback
 
     def parse_bind_method(self, method: Union[str, List]) -> str:
+        """
+        Get the method to be bound in class@method format.
+        """
         if isinstance(method, list):
             return '{0}@{1}'.format(*method)
 
         return method
 
     def call_method_binding(self, method: str, instance: Any) -> Any:
+        """
+        Get the method binding for the given method.
+        """
         return self.methodBindings[method](instance, self)
 
     def add_contextual_binding(self, concrete: Concrete, abstract: ClassAnnotation, implementation: Union[ClassAnnotation, Callable]) -> None:
+        """
+        Add a contextual binding to the container.
+        """
         if concrete not in self.contextual:
             self.contextual[concrete] = {}
         self.contextual[concrete][self.get_alias(abstract)] = implementation
 
     def bind_if(self, abstract: ClassAnnotation, concrete: Optional[Concrete] = None, shared: bool = False) -> None:
+        """
+        Register a binding if it hasn't already been registered.
+        """
         if not self.bound(abstract):
             self.bind(abstract, concrete, shared)
 
     def singleton(self, abstract: Abstract, concrete: Concrete = None) -> None:
+        """
+        Register a shared binding in the container.
+        """
         self.bind(abstract, concrete, True)
 
     def extend(self, abstract: ClassAnnotation, closure: Callable) -> None:
+        """
+        "Extend" an abstract type in the container.
+        """
         abstract = self.get_alias(abstract)
 
         if abstract in self.instances:
@@ -141,6 +186,9 @@ class Container(ContainerInterface):
                 self.rebound(abstract)
 
     def instance(self, abstract: ClassAnnotation, instance: Any) -> Any:
+        """
+        Register an existing instance as shared in the container.
+        """
         self.remove_abstract_alias(abstract)
         is_bound = self.bound(abstract)
 
@@ -154,6 +202,9 @@ class Container(ContainerInterface):
         return instance
 
     def remove_abstract_alias(self, searched: ClassAnnotation) -> None:
+        """
+        Remove an alias from the contextual binding alias cache.
+        """
         if searched not in self.aliases:
             return
 
@@ -163,6 +214,9 @@ class Container(ContainerInterface):
                     del self.abstractAliases[abstract][index]
 
     def tag(self, abstracts: Abstract, *tags):
+        """
+        Assign a set of tags to a given binding.
+        """
         for tag in tags:
             if tag not in self.tags:
                 self.tags[tag] = []
@@ -173,6 +227,9 @@ class Container(ContainerInterface):
                 self.tags[tag].append(abstract)
 
     def tagged(self, tag: str) -> List:
+        """
+        Resolve all of the bindings for a given tag.
+        """
         results = []
 
         if tag in self.tags:
@@ -182,12 +239,18 @@ class Container(ContainerInterface):
         return results
 
     def alias(self, abstract: ClassAnnotation, alias: ClassAnnotation):
+        """
+        Alias a type to a different name.
+        """
         self.aliases[alias] = abstract
         if abstract not in self.abstractAliases:
             self.abstractAliases[abstract] = []
         self.abstractAliases[abstract].append(alias)
 
     def rebinding(self, abstract: ClassAnnotation, callback: Callable):
+        """
+        Bind a new callback to an abstract's rebind event.
+        """
         abstract = self.get_alias(abstract)
         self.reboundCallbacks[abstract].append(callback)
 
@@ -195,6 +258,9 @@ class Container(ContainerInterface):
             self.make(abstract)
 
     def refresh(self, abstract: ClassAnnotation, target: Any, method: str) -> Any:
+        """
+        Refresh an instance on the given target and method.
+        """
         def closure(app, instance):
             func = getattr(target, method)
             func(instance)
@@ -202,35 +268,56 @@ class Container(ContainerInterface):
         return self.rebinding(abstract, closure)
 
     def rebound(self, abstract: ClassAnnotation) -> None:
+        """
+        Fire the "rebound" callbacks for the given abstract type.
+        """
         instance = self.make(abstract)
 
         for callback in self.get_rebound_callbacks(abstract):
             callback(self, instance)
 
     def get_rebound_callbacks(self, abstract: ClassAnnotation) -> List[Callable[[ContainerInterface, Any], Any]]:
+        """
+        Get the rebound callbacks for a given type.
+        """
         if abstract in self.reboundCallbacks:
             return self.reboundCallbacks[abstract]
 
         return []
 
     def wrap(self, callback: Callable, parameters: Parameters) -> Callable:
+        """
+        Wrap the given closure such that its dependencies will be injected when executed.
+        """
         def closure():
             self.call(callback, parameters)
 
         return closure
 
     def call(self, callback: Callable, parameters: Parameters = None, default_method: Callable = None):
+        """
+        Call the given Closure / class@method and inject its dependencies.
+        """
         return bound.call(self, callback, parameters, default_method)
 
     def factory(self, abstract: ClassAnnotation) -> Callable:
+        """
+        Get a closure to resolve the given type from the container.
+        """
         def closure():
             return self.make(abstract)
         return closure
 
     def make_with(self, abstract: ClassAnnotation, parameters: Parameters = None) -> Any:
+        """
+        An alias function name for make().
+        """
         return self.make(abstract, parameters)
 
-    def make(self, abstract: str, parameters: Parameters = None) -> Any:
+    def make(self, abstract: ClassAnnotation, parameters: Parameters = None) -> Any:
+        """
+        Resolve the given type from the container.
+        """
         if parameters is None:
             parameters = []
         return self.resolve(abstract, parameters)
@@ -242,6 +329,9 @@ class Container(ContainerInterface):
         raise EntryNotFoundException()
 
     def resolve(self, abstract: ClassAnnotation, parameters: Parameters = None) -> Any:
+        """
+        Resolve the given type from the container.
+        """
         if parameters is None:
             parameters = []
 
@@ -275,6 +365,9 @@ class Container(ContainerInterface):
         return obj
 
     def get_concrete(self, abstract: ClassAnnotation) -> Any:
+        """
+        Get the concrete type for a given abstract.
+        """
         concrete = self.get_contextual_concrete(abstract)
         if concrete is not None:
             return concrete
@@ -300,8 +393,9 @@ class Container(ContainerInterface):
         return None
 
     def find_in_contextual_bindings(self, abstract: str) -> Any:
-        if len(self.buildStack) > 0 and abstract in self.contextual[self.buildStack[-1]]:
-            return self.contextual[self.buildStack[-1]][abstract]
+        last_stack = self.buildStack[-1] if len(self.buildStack) > 0 else None
+        if last_stack is not None and last_stack in self.contextual and abstract in self.contextual[last_stack]:
+            return self.contextual[last_stack][abstract]
 
         return None
 
@@ -309,7 +403,10 @@ class Container(ContainerInterface):
         return concrete == abstract or callable(concrete)
 
     def build(self, concrete: Union[Callable, ClassAnnotation]) -> Any:
-        if callable(concrete):
+        """
+        Instantiate a concrete instance of the given type.
+        """
+        if callable(concrete) and type(concrete) is not type:
             return call_user_func(concrete, self, *self.get_last_parameter_override())
 
         self.buildStack.append(concrete)
@@ -326,11 +423,16 @@ class Container(ContainerInterface):
     def resolve_dependencies(self, dependencies: Signature):
         results = []
         for key, dependency in dependencies.parameters.items():
+            if key == 'self':
+                continue
             if self.has_parameter_override(dependency):
                 results.append(self.get_parameter_override(dependency))
                 continue
 
-            results.append(self.resolve_primitive(dependency) if dependency.annotation is Signature.empty else self.resolve_class(dependency))
+            if dependency.annotation is Signature.empty:
+                results.append(self.resolve_primitive(dependency))
+            else:
+                results.append(self.resolve_class(dependency))
 
         return results
 
@@ -372,6 +474,9 @@ class Container(ContainerInterface):
         raise BindingResolutionException(message)
 
     def resolving(self, *, abstract: ClassAnnotation = None, callback: Callable):
+        """
+        Register a new resolving callback.
+        """
         if abstract is not None:
             abstract = self.get_alias(abstract)
 
