@@ -4,3 +4,5 @@ build
 *.whl
 dist
 *.egg-info
+*.pyc
+__pycache__
