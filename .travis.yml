@@ -1,0 +1,11 @@
+sudo: false
+
+python:
+  - "3.5"
+  - "3.6"
+  - "pypy3-5.9.0"
+
+install:
+  - pip install nose
+
+script: nosetests illuminate_core
