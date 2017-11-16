@@ -11,15 +11,22 @@ DeferredServices = Dict[ClassAnnotation, Union[ServiceProvider, ClassAnnotation]
 
 class Kernel(Container):
     booted: bool = False
-    serviceProviders: List[ServiceProvider] = []
-    loadedProviders: Dict[str, bool] = {}
-    deferredServices: DeferredServices = {}
-    bootingCallbacks: List[Callable] = []
-    bootedCallbacks: List[Callable] = []
+    serviceProviders: List[ServiceProvider]
+    loadedProviders: Dict[str, bool]
+    deferredServices: DeferredServices
+    bootingCallbacks: List[Callable]
+    bootedCallbacks: List[Callable]
     hasBeenBootstrapped: bool = False
 
     def __init__(self):
         super().__init__()
+
+        self.serviceProviders: List[ServiceProvider] = []
+        self.loadedProviders: Dict[str, bool] = {}
+        self.deferredServices: DeferredServices = {}
+        self.bootingCallbacks: List[Callable] = []
+        self.bootedCallbacks: List[Callable] = []
+
         self.register_base_bindings()
         self.register_base_service_providers()
 
