@@ -3,9 +3,7 @@ from inspect import Signature, Parameter
 from typing import Dict, List, Callable, Any, Optional, Union
 
 from illuminate.support.utils import call_user_func
-
 from illuminate.contract.container import Container as ContainerInterface, ContextualBindingBuilder as ContextualBindingBuilderInterface
-
 from illuminate.container import bound
 from .builder import ContextualBindingBuilder
 from .exception import BindingResolutionException, EntryNotFoundException
@@ -13,25 +11,40 @@ from .types import ClassAnnotation, Abstract, Concrete, Parameters
 
 
 class Container(ContainerInterface):
-    _resolved: Dict[ClassAnnotation, bool] = {}
-    bindings: Dict[ClassAnnotation, Dict[str, Any]] = {}
-    methodBindings = {}
-    instances: Dict[ClassAnnotation, Any] = {}
-    aliases: Dict[ClassAnnotation, ClassAnnotation] = {}
-    abstractAliases: Dict[ClassAnnotation, List[ClassAnnotation]] = {}
-    extenders: Dict[ClassAnnotation, List[Callable[[Any, ContainerInterface], Any]]] = {}
-    tags: Dict[Any, List[ClassAnnotation]] = {}
-    buildStack: List[str] = []
-    withParameters: List[Parameters] = []
-    reboundCallbacks: Dict[ClassAnnotation, List[Callable[[ContainerInterface, Any], Any]]] = {}
-    globalResolvingCallbacks: List[Callable[[Any, ContainerInterface], Any]] = {}
-    globalAfterResolvingCallbacks: List[Callable[[Any, ContainerInterface], Any]] = {}
-    resolvingCallbacks: Dict[str, List[Callable]] = {}
-    afterResolvingCallbacks: Dict[str, List[Callable]] = {}
-    contextual: Dict[Concrete, Dict[ClassAnnotation, Union[ClassAnnotation, Callable]]] = {}
+    _resolved: Dict[ClassAnnotation, bool]
+    bindings: Dict[ClassAnnotation, Dict[str, Any]]
+    methodBindings: Dict[str, Callable]
+    instances: Dict[ClassAnnotation, Any]
+    aliases: Dict[ClassAnnotation, ClassAnnotation]
+    abstractAliases: Dict[ClassAnnotation, List[ClassAnnotation]]
+    extenders: Dict[ClassAnnotation, List[Callable[[Any, ContainerInterface], Any]]]
+    tags: Dict[Any, List[ClassAnnotation]]
+    buildStack: List[str]
+    withParameters: List[Parameters]
+    reboundCallbacks: Dict[ClassAnnotation, List[Callable[[ContainerInterface, Any], Any]]]
+    globalResolvingCallbacks: List[Callable[[Any, ContainerInterface], Any]]
+    globalAfterResolvingCallbacks: List[Callable[[Any, ContainerInterface], Any]]
+    resolvingCallbacks: Dict[str, List[Callable]]
+    afterResolvingCallbacks: Dict[str, List[Callable]]
+    contextual: Dict[Concrete, Dict[ClassAnnotation, Union[ClassAnnotation, Callable]]]
 
     def __init__(self):
-        pass
+        self._resolved: Dict[ClassAnnotation, bool] = {}
+        self.bindings: Dict[ClassAnnotation, Dict[str, Any]] = {}
+        self.methodBindings = {}
+        self.instances: Dict[ClassAnnotation, Any] = {}
+        self.aliases: Dict[ClassAnnotation, ClassAnnotation] = {}
+        self.abstractAliases: Dict[ClassAnnotation, List[ClassAnnotation]] = {}
+        self.extenders: Dict[ClassAnnotation, List[Callable[[Any, ContainerInterface], Any]]] = {}
+        self.tags: Dict[Any, List[ClassAnnotation]] = {}
+        self.buildStack: List[str] = []
+        self.withParameters: List[Parameters] = []
+        self.reboundCallbacks: Dict[ClassAnnotation, List[Callable[[ContainerInterface, Any], Any]]] = {}
+        self.globalResolvingCallbacks: List[Callable[[Any, ContainerInterface], Any]] = {}
+        self.globalAfterResolvingCallbacks: List[Callable[[Any, ContainerInterface], Any]] = {}
+        self.resolvingCallbacks: Dict[str, List[Callable]] = {}
+        self.afterResolvingCallbacks: Dict[str, List[Callable]] = {}
+        self.contextual: Dict[Concrete, Dict[ClassAnnotation, Union[ClassAnnotation, Callable]]] = {}
 
     def when(self, concrete: ClassAnnotation) -> ContextualBindingBuilderInterface:
         return ContextualBindingBuilder(self, self.get_alias(concrete))

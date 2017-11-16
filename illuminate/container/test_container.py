@@ -13,14 +13,28 @@ def test_named_instance():
     assert a == 123
 
 
-def test_name_bind():
+def test_name_bind_with_setter():
     c = Container()
 
     n = [123]
 
-    def closure(container):
+    def closure():
         n[0] += 1
         return n[0]
+
+    c['a'] = closure
+    assert c.make('a') == 124
+    assert n[0] == 124
+
+
+def test_name_bind():
+    c = Container()
+
+    t = [123]
+
+    def closure():
+        t[0] += 1
+        return t[0]
 
     c.bind('a', closure)
     assert c.make('a') == 124
@@ -57,7 +71,7 @@ def test_multiple_bind():
 def test_name_alias():
     c = Container()
 
-    def closure(app: Container):
+    def closure():
         return 124
 
     c.bind('a', closure)
@@ -73,6 +87,7 @@ def test_class_binding():
             pass
 
     assert isinstance(c.make(A), A)
+    assert isinstance(c[A], A)
 
 
 def test_class_inject():
@@ -87,3 +102,4 @@ def test_class_inject():
             pass
 
     assert isinstance(c.make(B), B)
+    assert isinstance(c[B], B)
